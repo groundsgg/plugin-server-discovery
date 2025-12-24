@@ -1,0 +1,50 @@
+version: v2beta1
+name: plugin-server-discovery-paper
+
+deployments:
+  app:
+    namespace: games
+    helm:
+      releaseName: plugin-server-discovery-paper
+      chart:
+        name: oci://ghcr.io/groundsgg/charts/grounds-service
+        version: 0.1.0
+      values:
+        deployment:
+          image:
+            repository: paper
+          containerPort: 25565
+          env:
+            - name: PAPER_VELOCITY_SECRET
+              value: "123456789"
+            - name: VALKEY_HOST
+              value: "valkey-headless.databases"
+            - name: VALKEY_PORT
+              value: "6379"
+            - name: SERVER_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+        service:
+          enabled: true
+          port: 25565
+          targetPort: 25565
+
+dev:
+  app:
+    # Search for the container that runs this image
+    imageSelector: paper
+    # Replace the container image with this image
+    devImage: ghcr.io/groundsgg/paper:0.1.0
+    sync:
+      - path: ./build/libs/*.jar:/app/plugins/*.jar
+        file: true
+    # Open a terminal and use the following command to start it
+    terminal:
+      command: |
+        echo "Use ./start.sh to start the server"
+        /bin/sh

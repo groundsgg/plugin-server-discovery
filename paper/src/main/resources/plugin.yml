@@ -1,0 +1,5 @@
+name: GroundsServerDiscovery
+version: 1.0.0-SNAPSHOT
+main: gg.grounds.GroundsPluginServerDiscovery
+
+api-version: 1.21
