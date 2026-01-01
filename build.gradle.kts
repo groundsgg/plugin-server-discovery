@@ -1,6 +1,7 @@
 plugins {
     base
-    java
+    kotlin("jvm") version "2.3.0"
+    kotlin("kapt") version "2.3.0"
 }
 
 group = "gg.grounds"
@@ -16,11 +17,11 @@ allprojects {
 }
 
 subprojects {
-    apply(plugin = "java")
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.jetbrains.kotlin.kapt")
 
-    java {
-        sourceCompatibility = JavaVersion.VERSION_25
-        targetCompatibility = JavaVersion.VERSION_25
+    kotlin {
+        jvmToolchain(25)
     }
 
     tasks.test {
