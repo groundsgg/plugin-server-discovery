@@ -5,18 +5,20 @@ import gg.grounds.discovery.PaperDiscoveryPublisher
 import org.bukkit.plugin.java.JavaPlugin
 
 class GroundsPluginServerDiscovery : JavaPlugin() {
-    private var publisher: PaperDiscoveryPublisher? = null
+    private lateinit var publisher: PaperDiscoveryPublisher
 
     override fun onEnable() {
         val config = PaperDiscoveryConfig.load()
 
         publisher = PaperDiscoveryPublisher(this, config)
-        publisher?.start()
+        publisher.start()
 
         logger.info("Paper server discovery initialized")
     }
 
     override fun onDisable() {
-        publisher?.stop()
+        if (this::publisher.isInitialized) {
+            publisher.stop()
+        }
     }
 }

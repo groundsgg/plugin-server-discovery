@@ -15,7 +15,7 @@ import org.slf4j.Logger
 class GroundsPluginServerDiscovery
 @Inject
 constructor(private val proxyServer: ProxyServer, private val logger: Logger) {
-    private var discoveryService: VelocityDiscoveryService? = null
+    private lateinit var discoveryService: VelocityDiscoveryService
 
     @Subscribe
     fun onProxyInitialize(event: ProxyInitializeEvent) {
@@ -35,15 +35,17 @@ constructor(private val proxyServer: ProxyServer, private val logger: Logger) {
 
     @Subscribe
     fun onProxyShutdown(event: ProxyShutdownEvent) {
-        discoveryService?.stop()
+        if (this::discoveryService.isInitialized) {
+            discoveryService.stop()
+        }
+
     }
 
     @Subscribe
     fun onPlayerChooseInitialServer(event: PlayerChooseInitialServerEvent) {
-        val service = discoveryService ?: return
         if (event.initialServer.isPresent) {
             return
         }
-        service.pickInitialServer().ifPresent(event::setInitialServer)
+        discoveryService.pickInitialServer().ifPresent(event::setInitialServer)
     }
 }
