@@ -35,6 +35,9 @@ jobs:
             echo "github.token=${{ secrets.GITHUB_TOKEN }}"
           } > ~/.gradle/gradle.properties
 
+      - name: Spotless
+        run: ./gradlew spotlessCheck
+
       - name: Build
         run: ./gradlew build --exclude-task test
 

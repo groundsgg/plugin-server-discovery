@@ -1,6 +1,4 @@
-plugins {
-    `java-library`
-}
+plugins { `java-library` }
 
 dependencies {
     api("redis.clients:jedis:3.9.0")
