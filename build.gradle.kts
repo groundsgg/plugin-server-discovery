@@ -6,10 +6,6 @@ plugins {
     id("maven-publish")
 }
 
-group = "gg.grounds"
-
-version = "1.0.0-SNAPSHOT"
-
 allprojects {
     apply(plugin = "com.diffplug.spotless")
 
