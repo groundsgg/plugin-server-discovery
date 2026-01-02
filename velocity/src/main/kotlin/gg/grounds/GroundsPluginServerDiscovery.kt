@@ -14,7 +14,7 @@ import org.slf4j.Logger
 @Plugin(
     id = "plugin-server-discovery",
     name = "Grounds Server Discovery Plugin",
-    version = BuildInfo.version,
+    version = BuildInfo.VERSION,
     description = "Grounds server discovery plugin for Velocity",
     authors = ["Grounds Development Team and contributors"],
     url = "https://github.com/groundsgg/plugin-server-discovery",

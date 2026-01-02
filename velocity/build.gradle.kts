@@ -1,6 +1,6 @@
 plugins {
     id("com.gradleup.shadow") version "9.3.0"
-    id("com.opencastsoftware.gradle.buildinfo") version "0.3.1"
+    id("com.github.gmazzo.buildconfig") version "6.0.7"
 }
 
 dependencies {
@@ -11,10 +11,6 @@ dependencies {
 
 tasks.build { dependsOn(tasks.shadowJar) }
 
-tasks
-    .matching { it.name == "kaptGenerateStubsKotlin" }
-    .configureEach { dependsOn(tasks.generateBuildInfo) }
-
 tasks.jar { enabled = false }
 
 tasks.shadowJar {
@@ -23,8 +19,11 @@ tasks.shadowJar {
     archiveVersion.set("") // Removes the version from the jar name
 }
 
-buildInfo {
-    packageName.set("gg.grounds")
-    className.set("BuildInfo")
-    properties.set(mapOf("version" to "${project.version}"))
+buildConfig {
+    className("BuildInfo")
+    packageName("gg.grounds")
+
+    useKotlinOutput()
+
+    buildConfigField("String", "VERSION", "\"${project.version}\"")
 }
