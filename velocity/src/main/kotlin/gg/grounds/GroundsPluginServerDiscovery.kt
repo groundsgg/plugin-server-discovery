@@ -38,7 +38,6 @@ constructor(private val proxyServer: ProxyServer, private val logger: Logger) {
         if (this::discoveryService.isInitialized) {
             discoveryService.stop()
         }
-
     }
 
     @Subscribe
