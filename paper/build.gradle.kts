@@ -15,8 +15,10 @@ tasks.shadowJar {
     archiveVersion.set("") // Removes the version from the jar name
 }
 
+val pluginVersion = project.version.toString()
+
 tasks.processResources {
     inputs.property("version", project.version)
 
-    filesMatching(listOf("**/plugin.yml")) { expand("VERSION" to project.version.toString()) }
+    filesMatching(listOf("**/plugin.yml")) { expand("VERSION" to pluginVersion) }
 }
