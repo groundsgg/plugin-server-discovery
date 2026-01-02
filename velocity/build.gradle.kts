@@ -2,8 +2,8 @@ plugins { id("com.gradleup.shadow") version "9.3.0" }
 
 dependencies {
     implementation(project(":common"))
-    compileOnly("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
-    kapt("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
+    compileOnly("com.velocitypowered:velocity-api:4.0.0-SNAPSHOT")
+    kapt("com.velocitypowered:velocity-api:4.0.0-SNAPSHOT")
 }
 
 tasks.build { dependsOn(tasks.shadowJar) }
