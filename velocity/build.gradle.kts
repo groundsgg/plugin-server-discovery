@@ -9,10 +9,11 @@ dependencies {
     kapt("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
 }
 
-tasks.build {
-    dependsOn(tasks.shadowJar)
-    dependsOn(tasks.generateBuildInfo)
-}
+tasks.build { dependsOn(tasks.shadowJar) }
+
+tasks
+    .matching { it.name == "kaptGenerateStubsKotlin" }
+    .configureEach { dependsOn(tasks.generateBuildInfo) }
 
 tasks.jar { enabled = false }
 
