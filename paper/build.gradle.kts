@@ -14,3 +14,9 @@ tasks.shadowJar {
     archiveClassifier.set("") // Removes the 'all' classifier
     archiveVersion.set("") // Removes the version from the jar name
 }
+
+tasks.processResources {
+    inputs.property("version", project.version)
+
+    filesMatching(listOf("**/plugin.yml")) { expand("VERSION" to project.version.toString()) }
+}
