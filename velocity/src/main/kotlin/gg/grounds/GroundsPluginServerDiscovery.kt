@@ -11,7 +11,14 @@ import gg.grounds.discovery.VelocityDiscoveryConfig
 import gg.grounds.discovery.VelocityDiscoveryService
 import org.slf4j.Logger
 
-@Plugin(id = "plugin-server-discovery", name = "Grounds Server Discovery Plugin")
+@Plugin(
+    id = "plugin-server-discovery",
+    name = "Grounds Server Discovery Plugin",
+    version = BuildInfo.VERSION,
+    description = "Grounds server discovery plugin for Velocity",
+    authors = ["Grounds Development Team and contributors"],
+    url = "https://github.com/groundsgg/plugin-server-discovery",
+)
 class GroundsPluginServerDiscovery
 @Inject
 constructor(private val proxyServer: ProxyServer, private val logger: Logger) {
