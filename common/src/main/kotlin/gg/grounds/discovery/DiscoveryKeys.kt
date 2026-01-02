@@ -1,9 +1,7 @@
 package gg.grounds.discovery
 
 object DiscoveryKeys {
-    private const val PAPER_PREFIX = "grounds:server-discovery:paper:"
+    private const val PAPER_HASH_KEY = "grounds:server-discovery:paper"
 
-    fun paperServerKey(serverName: String): String = "$PAPER_PREFIX$serverName"
-
-    fun paperServerPattern(): String = "$PAPER_PREFIX*"
+    fun paperServersHashKey(): String = PAPER_HASH_KEY
 }

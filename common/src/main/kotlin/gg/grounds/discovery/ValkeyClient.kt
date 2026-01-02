@@ -2,8 +2,6 @@ package gg.grounds.discovery
 
 import redis.clients.jedis.ConnectionPoolConfig
 import redis.clients.jedis.RedisClient
-import redis.clients.jedis.params.ScanParams
-import redis.clients.jedis.resps.ScanResult
 
 class ValkeyClient(config: ValkeyConfig) : AutoCloseable {
 
@@ -19,34 +17,16 @@ class ValkeyClient(config: ValkeyConfig) : AutoCloseable {
             )
             .build()
 
-    fun setWithTtl(key: String, value: String, ttlSeconds: Long) {
-        client.setex(key, ttlSeconds, value)
+    fun hset(key: String, field: String, value: String) {
+        client.hset(key, field, value)
     }
 
-    fun delete(key: String) {
-        client.del(key)
+    fun hgetAll(key: String): Map<String, String> {
+        return client.hgetAll(key)
     }
 
-    fun scanValues(pattern: String): Map<String, String> {
-        val params = ScanParams().match(pattern)
-        val values = mutableMapOf<String, String>()
-
-        var cursor = ScanParams.SCAN_POINTER_START
-        do {
-            val page: ScanResult<String> = client.scan(cursor, params)
-            cursor = page.cursor
-
-            val keys = page.result
-            if (keys.isEmpty()) continue
-
-            val fetchedValues = client.mget(*keys.toTypedArray())
-            for (i in keys.indices) {
-                val value = fetchedValues[i]
-                if (value != null) values[keys[i]] = value
-            }
-        } while (cursor != ScanParams.SCAN_POINTER_START)
-
-        return values
+    fun hdel(key: String, field: String) {
+        client.hdel(key, field)
     }
 
     override fun close() {

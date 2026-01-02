@@ -42,9 +42,10 @@ constructor(private val proxyServer: ProxyServer, private val logger: Logger) {
 
     @Subscribe
     fun onPlayerChooseInitialServer(event: PlayerChooseInitialServerEvent) {
-        if (event.initialServer.isPresent) {
+        if (event.initialServer.isPresent || proxyServer.allServers.isEmpty()) {
             return
         }
-        discoveryService.pickInitialServer().ifPresent(event::setInitialServer)
+
+        event.setInitialServer(proxyServer.allServers.first())
     }
 }

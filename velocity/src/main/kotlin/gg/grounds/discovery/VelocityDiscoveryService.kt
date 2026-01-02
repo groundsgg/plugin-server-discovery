@@ -1,12 +1,9 @@
 package gg.grounds.discovery
 
 import com.velocitypowered.api.proxy.ProxyServer
-import com.velocitypowered.api.proxy.server.RegisteredServer
 import com.velocitypowered.api.proxy.server.ServerInfo
 import com.velocitypowered.api.scheduler.ScheduledTask
 import java.net.InetSocketAddress
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import org.slf4j.Logger
 
@@ -16,7 +13,6 @@ class VelocityDiscoveryService(
     config: VelocityDiscoveryConfig,
 ) {
     private val client = ValkeyClient(config.valkeyConfig)
-    private val registeredServers: MutableMap<String, ServerInfo> = ConcurrentHashMap()
     private var pollTask: ScheduledTask? = null
 
     fun start(plugin: Any) {
@@ -24,14 +20,13 @@ class VelocityDiscoveryService(
         pollTask =
             proxyServer.scheduler
                 .buildTask(plugin, this::refreshServers)
-                .repeat(5, TimeUnit.SECONDS)
+                .repeat(1, TimeUnit.SECONDS)
                 .schedule()
     }
 
     fun stop() {
         pollTask?.cancel()
-        registeredServers.values.forEach { info -> proxyServer.unregisterServer(info) }
-        registeredServers.clear()
+
         try {
             client.close()
         } catch (e: Exception) {
@@ -39,26 +34,29 @@ class VelocityDiscoveryService(
         }
     }
 
-    fun pickInitialServer(): Optional<RegisteredServer> {
-        return registeredServers.values.firstOrNull()?.let { proxyServer.getServer(it.name) }
-            ?: Optional.empty()
-    }
-
     private fun refreshServers() {
         val entries =
             try {
-                client.scanValues(DiscoveryKeys.paperServerPattern())
+                client.hgetAll(DiscoveryKeys.paperServersHashKey())
             } catch (e: Exception) {
-                logger.warn("Failed to scan Valkey for servers: {}", e.message)
+                logger.warn("Failed to load discovery entries from Valkey: {}", e.message)
                 return
             }
 
+        val now = System.currentTimeMillis()
+        val staleThresholdMillis = TimeUnit.SECONDS.toMillis(15)
         val servers = HashSet<String>()
 
-        for ((key, value) in entries) {
+        for ((field, value) in entries) {
             val parsed = PaperServerEntry.decode(value)
             if (parsed == null) {
-                logger.warn("Invalid discovery entry for key {}", key)
+                logger.warn("Invalid discovery entry for field {}", field)
+                continue
+            }
+            val lastSeen = parsed.lastSeenMillis
+            if (lastSeen <= 0L || now - lastSeen > staleThresholdMillis) {
+                logger.info("Removing stale discovery entry for server {}", parsed.name)
+                client.hdel(DiscoveryKeys.paperServersHashKey(), field)
                 continue
             }
             servers.add(parsed.name)
@@ -69,13 +67,10 @@ class VelocityDiscoveryService(
     }
 
     private fun unregisterMissing(aliveNames: Set<String>) {
-        val iterator = registeredServers.entries.iterator()
-        while (iterator.hasNext()) {
-            val existing = iterator.next()
-            if (!aliveNames.contains(existing.key)) {
-                proxyServer.unregisterServer(existing.value)
-                iterator.remove()
-                logger.info("Unregistered stale server {}", existing.key)
+        for (existing in proxyServer.allServers) {
+            if (!aliveNames.contains(existing.serverInfo.name)) {
+                proxyServer.unregisterServer(existing.serverInfo)
+                logger.info("Unregistered stale server {}", existing.serverInfo.name)
             }
         }
     }
@@ -84,17 +79,6 @@ class VelocityDiscoveryService(
         val name = entry.name
         val address = InetSocketAddress.createUnresolved(entry.host, entry.port)
         val desiredInfo = ServerInfo(name, address)
-
-        val existing = registeredServers[name]
-        if (existing != null) {
-            if (existing.address != address) {
-                proxyServer.unregisterServer(existing)
-                proxyServer.registerServer(desiredInfo)
-                registeredServers[name] = desiredInfo
-                logger.info("Updated discovered server {}", name)
-            }
-            return
-        }
 
         val proxyExisting = proxyServer.getServer(name)
         if (proxyExisting.isPresent) {
@@ -106,12 +90,10 @@ class VelocityDiscoveryService(
                 )
                 return
             }
-            registeredServers[name] = existingInfo
             return
         }
 
         proxyServer.registerServer(desiredInfo)
-        registeredServers[name] = desiredInfo
         logger.info("Registered discovered server {}", name)
     }
 }

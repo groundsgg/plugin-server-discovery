@@ -5,12 +5,7 @@ import org.junit.jupiter.api.Test
 
 class DiscoveryKeysTest {
     @Test
-    fun paperServerKeyBuildsExpectedPrefix() {
-        assertEquals("grounds:server-discovery:paper:lobby", DiscoveryKeys.paperServerKey("lobby"))
-    }
-
-    @Test
-    fun paperServerPatternUsesPrefixWildcard() {
-        assertEquals("grounds:server-discovery:paper:*", DiscoveryKeys.paperServerPattern())
+    fun paperServersHashKeyMatchesExpectedValue() {
+        assertEquals("grounds:server-discovery:paper", DiscoveryKeys.paperServersHashKey())
     }
 }
