@@ -9,7 +9,10 @@ dependencies {
     kapt("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
 }
 
-tasks.build { dependsOn(tasks.shadowJar) }
+tasks.build {
+    dependsOn(tasks.shadowJar)
+    dependsOn(tasks.generateBuildInfo)
+}
 
 tasks.jar { enabled = false }
 
@@ -24,13 +27,3 @@ buildInfo {
     className.set("BuildInfo")
     properties.set(mapOf("version" to "${project.version}"))
 }
-
-val generateBuildInfo: TaskProvider<Task> = tasks.named("generateBuildInfo")
-
-tasks
-    .matching { it.name == "kaptGenerateStubsKotlin" }
-    .configureEach { dependsOn(generateBuildInfo) }
-
-tasks.matching { it.name == "kaptKotlin" }.configureEach { dependsOn(generateBuildInfo) }
-
-tasks.matching { it.name == "compileKotlin" }.configureEach { dependsOn(generateBuildInfo) }
