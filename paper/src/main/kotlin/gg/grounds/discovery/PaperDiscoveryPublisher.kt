@@ -8,7 +8,7 @@ class PaperDiscoveryPublisher(
     private val config: PaperDiscoveryConfig,
 ) {
     private val client = ValkeyClient(config.valkeyConfig)
-    private val entryKey = DiscoveryKeys.paperServerKey(config.baseEntry.name)
+    private val entryHashKey = DiscoveryKeys.paperServersHashKey()
     private var heartbeatTask: BukkitTask? = null
 
     fun start() {
@@ -20,7 +20,7 @@ class PaperDiscoveryPublisher(
     fun stop() {
         heartbeatTask?.cancel()
         try {
-            client.delete(entryKey)
+            client.hdel(entryHashKey, config.baseEntry.name)
         } catch (e: Exception) {
             plugin.logger.warning("Failed to remove discovery entry: ${e.message}")
         } finally {
@@ -34,7 +34,8 @@ class PaperDiscoveryPublisher(
 
     private fun updateEntry() {
         try {
-            client.setWithTtl(entryKey, config.baseEntry.encode(), 3L)
+            val entry = config.baseEntry.copy(lastSeenMillis = System.currentTimeMillis())
+            client.hset(entryHashKey, entry.name, entry.encode())
         } catch (e: Exception) {
             plugin.logger.warning("Failed to update discovery entry: ${e.message}")
         }
