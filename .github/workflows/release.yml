@@ -35,4 +35,4 @@ jobs:
           # Remove the leading 'v' from the tag to get the version number
           version_override="${tag_name#v}"
           
-          ./gradlew publish -PversionOverride="version_override"
+          ./gradlew publish -PversionOverride="$version_override"
